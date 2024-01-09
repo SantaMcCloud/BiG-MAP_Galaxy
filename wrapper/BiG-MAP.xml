@@ -1,0 +1,318 @@
+<tool id="big-map" name="BiG-MAP" version="@VERSION@" profile="@PROFILE@">
+       <description> 
+       </description>
+       <macro>
+              <token name="@VERSION@">0.0+galaxy0</token>
+              <token name="@PROFILE@">21.05</token>
+       </macro>
+       <requirements>
+       # conda package when the recipe is on git!
+       </requirements>
+       <command detect_errors="exit_code">
+       <![CDATA[
+              mkdir output_download
+              #if &{download.used_methode} == "download":       
+                     python3 src/BiG-MAP.download.py
+                     --acclist '${acclist}'
+                     --outdir output_download
+              #end if
+              mkdir family_input
+              #for $input in ${indir}:
+                     ln -s $input family_input/str( $input )
+              #end for
+
+              mkdir ${family_output}
+              python3 src/BiG-MAP.family.py 
+              #if &{download.used_methode} == "download":
+                     --indir output_download
+              #else:
+                     --indir family_input
+              #end if
+              --outdir ${family_output}
+              --threshold_GC ${threshold_GC}
+              --threshold_HG ${threshold_HG}
+              --flank_genes ${flank_genes}
+              ${genomefiles}
+              --sketch ${sketch}
+              --kmer ${kmer}
+              ${metatranscriptomes}
+              #if ${bigscape.use_bigscape} == "yes":
+                     --cut-off ${cut_off}
+                     --bigscape_path '${bigscape_path}'
+                     --pfam '${pfam}'
+                     --threads ${threads}
+              #end if
+
+
+              mkdir ${map_output}
+              python3 src/BiG-MAP.map.py
+              #if ${input_form.data_inputs} == "paired":
+                     #for $i1 in ${fastq1}:
+                            --fastq1 '$i1'
+                     #end for
+                     #for $i2 in ${fastq2}:
+                           --fastq2 '$i2'
+                     #end for
+              #else:
+                     #for $unp in ${U_fastq}:
+                            -- U_fastq '$unp'
+                     #end for
+              #end if
+              ${pickle_file}
+              --outdir ${map_output}
+              #if ${biom.biom_format} == "yes":
+                     --biom_output '${biom_output}'
+              #end if
+              ${fasta}
+              --bowtie2_setting '${bowtie2_setting}.value'
+              ${average}
+              --threads ${th}
+
+
+              mkdir ${analyse_output}
+              #if ${biom_file}.value == ".metacore.dec.biom":
+                     --biom_file #this input here
+              #else:
+                     --biom_file #the other input here
+              #end if
+              --sample_type '${sample_type}.value'
+              --metagroup '${metagroup}'
+              --outdir ${analyse_output}
+              #if ${explore_option.selected} == "yes":
+                     --explore
+                     --threshold ${threshold}
+                     --file_name_explore '${file_name_explore}'
+              #end if
+              #if ${compare_option.selected} == "yes":
+                     --compare
+                     --groups '${groups}'
+                     --alpha_fitzig ${alpha_fitzig}
+                     --alpha_kruskal ${alpha_kruskal}
+                     #if ${change_name.file_names_compare} == "yes":
+                            --file_names_compare '${changed_names}'
+                     #end if
+              #end if
+              --cutoff_samples ${cutoff_samples}
+       ]]>
+       </command>
+       <inputs>
+              <conditional name="download" >
+                     <param type="select" name="used_methode" label="Select Input methode"
+                            help="Select the wanted methode if you want to download the data or provide your own data" >
+                                   <option value="no_download"> Use own antiSMASH/gutSMASH files </option>
+                                   <option value="downlaod"> Use the build in download function </option>
+                     </param>
+                     <when value="download">
+                            <param argument="--acclist" type="data" format=".txt"
+                                   label="Input *.txt file"
+                                   help="You can either download an  accession list via https://www.ncbi.nlm.nih.gov/Traces/study/
+                                   or you can create your own accession list. How the list should look like please have a look at
+                                   the end of the tool in the help section, there you can see an example of such a file!" />
+                            </when>
+                            <when value="no_download" >
+                            </when>
+              </conditional>
+              <param argument="--indir" type="data" format="?" # do antiSMASH/gutSMASH has a Specific format?
+                     label="Input antiSMASH/gutSMASH files"
+                     help="Use your own antiSMASH/gutSMASH files instead of download them from the included function" />
+              # .family.py ###############################
+              <param argument="--threshold_GC" type="float" value="0.8" min="0.0" max="1.0" optional="true"
+                     label="Threshold for consider protein sequence to be similar"
+                     help="Here you can decide at which threshold the protein sequence should be considere to be similiar. Default = 0.8" />
+              <param argument="--threshold_HG" type="flaot" value="0.1" min="0.0" max="1.0" optional="true"
+                     label="Threshold for consider protein sequence (housekeeping) to be similar"
+                     help="Here you can decide at which threshold the protein sequence of the housekeeping gene should be considere to be similiar. Default = 0.1" />
+              # bigscape.py options -> check if keep it if yes use conditional like above to get all option covered therer ######## 
+              <conditional name="bigscape" >
+                     <param type="select" name="use_bigscape" label="Do you want to use BiG-SCAPE" 
+                            help="Select if you want to use BiG-SCAPE or not as extra run">
+                                   <option vlaue="not"> no </option>
+                                   <option value="yes"> yes </option>
+                     </param>
+                     <when vlaue="yes"> 
+                            <param argument="--cut-off" type="float" value="0.2" min="0.0" max="1.0" optional="true"
+                                   label="cutoff value for BiG-SCAPE"
+                                   help="Here you can change the vlaue for the cutoff value where BiG-SCAPE consider protein sequences of the gene clusters to be similiar. Default = 0.2" />
+                            <param argument="--bigscape_path" type="text" value="" optional="false"
+                                   label="Path to bigscape.py"
+                                   help="Please enter the path to the bigscape.py to use it">
+                                          <validator type="empty_field"/>
+                            </param>
+                            <param argument="--pfam" type="text" value="" optional="false"
+                                   label="Path to the pfam files dir"
+                                   help="Please enter the path to the pfam files dir">
+                                          <validator type="empty_field" />
+                            </param>
+                            <param argument="--threads" type="integer" vlaue="6" optional="true"
+                                   label="Number or threads/core used in bigscape.py"
+                                   help="Please enter the number of threads/core which should be used for the bigscape.py run. Default = 6" />
+                     </when>
+                     <when vlaue="no">
+                     </when>
+              </conditional>
+              ########################################
+              <param argument="--flank_genes" type="integer" value="0" min="0" optional="True"
+                     label="Number of genes flanking the core gene"
+                     help="Specify the number of genes flanking the core gene of a gene cluster. Default = 0" />
+              <param argument="--genomefiles" type="boolean" truevalue="--genomefiles true" falsevalue="" checked="False"
+                     label="Whole genome fasta file as output?"
+                     help="When toggle this tool will output you a bigger fasta files. WARNING: This might use more disc space!" />
+              <param argument="--sketch" type="integer" value="5000" optional="True"
+                     label="sketch size (by Mash)"
+                     help="Specify the the sketch size which is created by Mash. NOTE: Please read the Mash instructions when changing this value. Default = 5000" />
+              <param argument="--kmer" type="integer" vlaue="16" optional="True"
+                     label="k-mer size (by Mash)"
+                     help="Specify the the k-mer size which is created by Mash. NOTE: Please read the Mash instructions when changing this value. Default = 16" />
+              <param argument="--metatranscriptomes" type="boolean" truevalue="--metatranscriptomes" falsevalue="" checked="False"
+                     label="include house-keeping gene"
+                     help="When you want to use house-keeping gene in the analysis toggle this option to true." />
+       # BiG-MAP.map.py ##############################
+              <conditional name="input_form">
+                     <param type="select" name="data_inputs" label="Select if paired/unpaired input"
+                            help="Select which form of input you want to use.">
+                                   <option value="paired"> paired inputs </option>
+                                   <option values="unpaired"> unpaired input </option>
+                     </param>
+                     <when value="paired">
+                            <param argument="--fastq1" type="data" multiple="true" format=".fastq .fq -fq.gz .fna .fa .fasta .fastq.gz"
+                                   label="Input the first mate for the paired pair"
+                                   help="Provide the first mate of the paired metagenomic and/or metatranscriptomic sample. Provide the sample in the fastq-format. It is possibe also to use the fasta-format, when you use this fomrat please toggel the optin for it!" />
+                            <param argument="--fastq2" type="data" multiple="true" format=".fastq .fq -fq.gz .fna .fa .fasta"
+                                   label="Input the second mate for the paired pair"
+                                   help="Provide the second mate of the paired metagenomic and/or metatranscriptomic sample. Provide the sample in the fastq-format. It is possibe also to use the fasta-format, when you use this fomrat please toggel the optin for it!" />
+                     </when>
+                     <when value="unpaired">
+                            <param argument="--U_fastq" type="data" multiple="true" format=".fastq .fq -fq.gz .fna .fa .fasta .fastq.gz"
+                                   label="Input the unpaired sample"
+                                   help="Provide the unpaired metagenomic/metatranscriptomic sample. Provide the sample in the fastq-format. It is possibe also to use the fasta-format, when you use this fomrat please toggel the optin for it!" />
+                     </when>
+              <param argument="--pickle_file" type="boolean" truevalue="--pickle_file ${family_output}/*pickle*" falsevalue="--family ${family_output}" checked="False"
+                     label="Want to use pickle file?"
+                     help="The family module from BiG-MAP create a pickle file which can be used instead of the hole output from the module." /> # maybe give the option to use therer own pickle file if there can be done?
+              <conditional name="biom" >
+                     <param type="select" name="biom_foramt" label="Extra biom format output"
+                            help="Select if you want to have a biom fiel as output aswell. It is recommended to use this option!" >
+                                   <option value="yes"> yes </option>
+                                   <option vlaue="not"> no </option>
+                     </param>
+                     <when vlaue="yes">
+                            <param argument="--biom_output" type="data" format=".txt"
+                                   label="Input the metadata file here"
+                                   help="Input the metadata so this BiG-MAP.map.py will output the data in biom format aswell. "/> #check if there is a metadata in any output or if you have to write your own
+                     </when>
+                     <when vlaue="no">
+                     </when>
+              </conditional>
+              <param argument="--fasta" type="boolean" truevalue="--fasta" falsevalue="" checked="False"
+                     label="Using fasta-format input"
+                     help="Toggle if you want to use fasta file format instead fo the fastq file format" />
+              <param argument="--bowtie2_setting" type="select"
+                     label="Select Bowtie2 setting"
+                     help="Here you can choose how bowtie2 should work in the alligment.">
+                            <option value="fast"> fast </option>
+                            <option value="very-fast"> very-fast </option>
+                            <option value="sensitive"> sensitive </option>
+                            <option value="very-sensitive"> very-sensitive </option>
+                            <option value="very-fast-local"> very-fast-local </option>
+                            <option value="fast-local"> fast-local </option>
+                            <option value="sensitive-local"> sensitive-local </option>
+                            <option value="very-sensitive-local"> very-sensitive-local </option>
+              </param> # ask about the local if this can also work on the server or not 
+              <param argument="--average" type="boolean" truevalue="--average" falsevalue="" checked="False"
+                     label="Average values as output"
+                     help="Toggle if you want to habe output read as average value instead of summed counts. This option is recommended to use!" />
+              <param argument="--th" type="integer" value="6" optinal="true"
+                     label="Number for threads for bowtie2"
+                     help="Here you can choose the number of threads which should be use for the bowtie2 mappning step. Default = 6" />
+       # BiG-MAP.analyse.py ################
+       # thhink about the biom file here, check after the test how you might can bring it up here
+       <param argument="--biom_file" type="select"
+              label="format of the biom file"
+              help="Select which format of the biom file should have. Use .metacore.dec.biom when you want to plot the result for the hole gene cluster or use .mapcore.metacore.dec.biom if you want to plot only the core genomic region of the gene clusters.">
+                     <option value=".metacore.dec.biom"> .metacore.dec.biom </option>
+                     <option value=".mapcore.metacore.dec.biom"> .mapcore.metacore.dec.biom </option>
+       </param>
+       <param argument="--sample_type" type="select"
+              label="Sample type"
+              help="Select from the two options which kind of sample type you want to analyse" >
+                     <option value="metagenomic" > metagenomic </option>
+                     <option value="metatranscriptomic"> metatranscriptomic </option>
+       </param>
+       <param argument="--metagroup" type="text" value="" optional="false"
+              label="Provide the metagroup for the output"
+              help="Here you can write the metagroup which should be used for the output. As an example for the metagroups could be: DiseaseStatus or Longitude and much more." >
+              <validator type="empty_field" />
+       </param>
+       <conditional name="explore_option">
+              <param name="selected" type="select" label="Use explore option"
+                     help="Use yes when you want to explore the best covered gene clusters">
+                     <option value="no"> no </option>
+                     <option value="yes"> yes </option>
+              </param>
+              <when value="yes">
+                     <param argument="--threshold" type="integer" value="20" optional="true"
+                            label="Amount of displayed gene cluster"
+                            help="Here you can change how many gene cluster will be displayed. Default = 20" />
+                     <param argument="--file_name_explore" type="text" value="explore_heatmap" optional="true"
+                            label="Name of the output file"
+                            help="File name for explore heatmap. Default = explore_heatmap" />
+              </when>
+              <when value="no">
+              </when>
+       </conditional>
+       <conditional name="compare_option">
+              <param name="selected" type="select" label="Use compare option"
+                     help="Use yes when you want to make a comparison between two groups using fitZIG and Kruskal-Wallis" >
+                            <option value="no"> no </option>
+                            <option value="yes"> yes </option>
+              </param>
+              <when value="yes">
+                     <param argument="--groups" type="text" value="" optional="false"
+                            label="Groups which should be compared"
+                            help="Space separated list of 2 groups that are to be compared. Example: UC Control or UC CD" >
+                                   	<validator type="empty_field" />
+                     </param>
+                     <param argument="--alpha_fitzig" type="float" value="0.05" min="0.0" max="1.0" optional="true"
+                            label="Alpha value for the fitZIG model"
+                            help="Alpha value to determine significance of the fitZIG model. Default=0.05" />
+                     <param argument="--alpha_kruskal" type="float" value="0.05" min="0.0" max="1.0" optional="true"
+                            label="Alpha value for the Kruskal Wallis model"
+                            help="Alpha value to determine significance of the Kruskal Wallis model. Default=0.05" />
+                     <conditional name="change_name">
+                            <param argument="--file_names_compare" type="select" label="Change compare file name"
+                                   help="If you want to change the compare file name select yes" >
+                                          <option vlaue="no"> no </option>
+                                          <option vlaue="yes"> yes </option>
+                            </param>
+                            <when value="yes">
+                                   <param name="changed_names" type="text" value="" optional="false"
+                                          label="Type the names for the compare files"
+                                          help=" Output file names for Kruskal Wallis and fitZIG heatmaps. Input first the name for Kruskal Wallis, then for fitZIG, seperated with space please!" >
+                                                 <validator type="empty_field" />
+                                   </param>
+                            </when>
+                            <when value="no">
+                            </when>
+                     </conditional>
+              </when>
+              <when value="no">
+              </when>
+       </conditional>
+       <param argument="--cutoff_samples" type="float" value="0.25" min="0.0" max="1.0" optional="true"
+              label="Cutoff value for filter BGCs"
+              help=" Cut-off value to filter BGCs with low amount of hits. Default=0.25" />
+       </inputs>
+       <outputs>
+              <data name="family_output" />
+              <data name="map_output" />
+              <data name="analyse_output" />
+       </outputs>
+       <help>
+       <![CDATA[
+              # TODO: Wrote this section befor upload the tool!
+       ]]>
+       </help>
+       <citations> 
+              <citation type="doi">10.1128/msystems.00937-21</citation>
+       </citations>
+</tool>

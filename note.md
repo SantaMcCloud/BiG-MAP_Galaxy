@@ -15,6 +15,8 @@ TODO:
     - Schauen ob man beide tools direkt mit planemo bekommen kann dann kann man volle funktionalität prüfen (nicht vergessen die bigscape.py fix version zu nehmen)
 - Outputs erstellen
 - Test erstellen
+- help text für jeden param aktualisieren
+- Help section schreiben
 
 ERRORS:
 

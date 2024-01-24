@@ -1,0 +1,62 @@
+(BiG-MAP_process) sf373@LAPTOP-7RMLPR2D:~/sf373/Project/BiG-MAP_working$ python3 BiG-MAP/src/BiG-MAP.map.py -b Metadata/schirmer_metadata.txt -I1 down_out/*pass_1* -I2 down_out/*pass_2* -O map_out_test_1/ -F fam_out_test_1/
+__________Fastq-files_________________________________
+down_out/SRR5947824_pass_1.fastq.gz
+down_out/SRR5947836_pass_1.fastq.gz
+down_out/SRR5947837_pass_1.fastq.gz
+down_out/SRR5947841_pass_1.fastq.gz
+down_out/SRR5947855_pass_1.fastq.gz
+down_out/SRR5947861_pass_1.fastq.gz
+down_out/SRR5947862_pass_1.fastq.gz
+down_out/SRR5947881_pass_1.fastq.gz
+______________________________________________________
+down_out/SRR5947824_pass_2.fastq.gz
+down_out/SRR5947836_pass_2.fastq.gz
+down_out/SRR5947837_pass_2.fastq.gz
+down_out/SRR5947841_pass_2.fastq.gz
+down_out/SRR5947855_pass_2.fastq.gz
+down_out/SRR5947861_pass_2.fastq.gz
+down_out/SRR5947862_pass_2.fastq.gz
+down_out/SRR5947881_pass_2.fastq.gz
+Building a SMALL index
+Mapping reads using bowtie
+  Dealing with sample SRR5947824
+  Dealing with sample SRR5947836
+  Dealing with sample SRR5947837
+  Dealing with sample SRR5947841
+  Dealing with sample SRR5947855
+  Dealing with sample SRR5947861
+  Dealing with sample SRR5947862
+  Dealing with sample SRR5947881
+Adding metadeta to biom and converting files into json format
+Traceback (most recent call last):
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/bin/biom", line 6, in <module>
+    sys.exit(biom.cli.cli())
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 829, in __call__
+    return self.main(*args, **kwargs)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 782, in main
+    rv = self.invoke(ctx)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 1259, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 1066, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 610, in invoke
+    return callback(*args, **kwargs)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/cli/metadata_adder.py", line 107, in add_metadata
+    float_fields, sample_header, observation_header)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/cli/metadata_adder.py", line 174, in _add_metadata
+    header=observation_header)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/parse.py", line 530, in from_file
+    raise BiomParseException("No data found in mapping file.")
+biom.exception.BiomParseException: No data found in mapping file.
+Traceback (most recent call last):
+  File "BiG-MAP/src/BiG-MAP.map.py", line 1129, in <module>
+    main()
+  File "BiG-MAP/src/BiG-MAP.map.py", line 1093, in main
+    biom_out1 = decoratebiom(biomfile, args.outdir, args.biom_output)
+  File "BiG-MAP/src/BiG-MAP.map.py", line 797, in decoratebiom
+    res_feature = subprocess.check_output(cmd_feature, shell=True)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/subprocess.py", line 336, in check_output
+    **kwargs).stdout
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/subprocess.py", line 418, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command 'biom add-metadata --observation-metadata-fp map_out_test_1/BiG-MAP.map.coverage.txt -i map_out_test_1/BiG-MAP.map.meta.biom -o map_out_test_1/BiG-MAP.map.meta.biom --output-as-json' returned non-zero exit status 1.

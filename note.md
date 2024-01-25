@@ -24,6 +24,7 @@ TODO:
         - Für [--explore] muss auch [-t] angeben werden sowie [-fe] !!!!!
         - Wenn man [--compare] nutzt muss man auch [-g] nutzen => WICHTIG!!!!
         - auch hier muss man dann [-af] und [-ak] und [-fc]einstellen können!!!!!
+        - [-fc] man gibt erst an wie die KW file heißt dann wie die FIZ file heißt
         - so einstellen das!!!!!!
         - explore + t + fe
         - compare + -af + ak + fc
@@ -32,7 +33,7 @@ TODO:
 ERRORS:
 
 GETESTETE OPTIONS:
-- .downlaod.py -> fertig getestet
+- .downlaod.py => fertig getestet
     - [-A] 
         - getestet
     - [-O] 
@@ -51,9 +52,21 @@ GETESTETE OPTIONS:
         - getestet
     - [-c]
         - getestet
+    - [-f]
+        - getestet -> gibt sogar aus wenn die nummer für gewisse files zu größ ist
+    - [-g] 
+        - getestet
+    - [-s]
+        - getestet
+    - [-k]
+        - getestet
+    - [-p]
+        - kann ignoriert werden
+    - [--metatranscriptomes]
+
 - .map.py
     -
-- .analyse.py
+- .analyse.py => fertig getestet
     - [--explore]
         - gestetet
     - [-B]
@@ -76,6 +89,10 @@ GETESTETE OPTIONS:
         - getestet
     - [-fe]
         - getestet 
+    - [-fc]
+        - getestet
+    - [-t]
+        - getestet
     
     
 

@@ -1,0 +1,69 @@
+(BiG-MAP_process) sf373@LAPTOP-7RMLPR2D:~/sf373/Project/BiG-MAP_working$ python3 BiG-MAP/src/BiG-MAP.map.py -b Metadata/schirmer_metadata.txt -I1 down_out/*pass_1* -I2 down_out/*pass_2* -F fam_out/ -O map_1/ -a True
+False -f True -a fast -s 6 -th
+__________Fastq-files_________________________________
+down_out/SRR5947824_pass_1.fastq.gz
+down_out/SRR5947836_pass_1.fastq.gz
+down_out/SRR5947837_pass_1.fastq.gz
+down_out/SRR5947841_pass_1.fastq.gz
+down_out/SRR5947855_pass_1.fastq.gz
+down_out/SRR5947861_pass_1.fastq.gz
+down_out/SRR5947862_pass_1.fastq.gz
+down_out/SRR5947881_pass_1.fastq.gz
+______________________________________________________
+down_out/SRR5947824_pass_2.fastq.gz
+down_out/SRR5947836_pass_2.fastq.gz
+down_out/SRR5947837_pass_2.fastq.gz
+down_out/SRR5947841_pass_2.fastq.gz
+down_out/SRR5947855_pass_2.fastq.gz
+down_out/SRR5947861_pass_2.fastq.gz
+down_out/SRR5947862_pass_2.fastq.gz
+down_out/SRR5947881_pass_2.fastq.gz
+Building a SMALL index
+Mapping reads using bowtie
+  Dealing with sample SRR5947824
+  Dealing with sample SRR5947836
+  Dealing with sample SRR5947837
+  Dealing with sample SRR5947841
+  Dealing with sample SRR5947855
+  Dealing with sample SRR5947861
+  Dealing with sample SRR5947862
+  Dealing with sample SRR5947881
+Adding metadeta to biom and converting files into json format
+Traceback (most recent call last):
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/bin/biom", line 6, in <module>
+    sys.exit(biom.cli.cli())
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 829, in __call__
+    return self.main(*args, **kwargs)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 782, in main
+    rv = self.invoke(ctx)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 1259, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 1066, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/click/core.py", line 610, in invoke
+    return callback(*args, **kwargs)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/cli/table_converter.py", line 114, in convert
+    table = load_table(input_fp)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/parse.py", line 654, in load_table
+    table = parse_biom_table(fp)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/parse.py", line 408, in parse_biom_table
+    t = Table.from_tsv(fp, None, None, lambda x: x)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/table.py", line 4430, in from_tsv
+    return Table(data, obs_ids, sample_ids, obs_metadata, sample_metadata)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/table.py", line 397, in __init__
+    errcheck(self)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/site-packages/biom_format-2.1.6-py3.6-linux-x86_64.egg/biom/err.py", line 472, in errcheck
+    raise ret
+biom.exception.TableException: Duplicate sample IDs!
+Traceback (most recent call last):
+  File "BiG-MAP/src/BiG-MAP.map.py", line 1130, in <module>
+    main()
+  File "BiG-MAP/src/BiG-MAP.map.py", line 1097, in main
+    biomfile2 = export2biom(args.outdir, "core")
+  File "BiG-MAP/src/BiG-MAP.map.py", line 776, in export2biom
+    res_export = subprocess.check_output(cmd_export2biom, shell=True)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/subprocess.py", line 336, in check_output
+    **kwargs).stdout
+  File "/home/sf373/miniconda3/envs/BiG-MAP_process/lib/python3.6/subprocess.py", line 418, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command 'biom convert -i map_1/BiG-MAP.map.results.coreRPKM.txt -o map_1/BiG-MAP.mapcore.biom --table-type='Pathway table' --to-json' returned non-zero exit status 1.

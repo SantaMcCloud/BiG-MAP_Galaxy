@@ -1,0 +1,12 @@
+(BiG-MAP_process) sf373@LAPTOP-7RMLPR2D:~/sf373/Project/BiG-MAP_working$ python3 BiG-MAP/src/BiG-MAP.map.py -b Metadata/schirmer_metadata.txt -U down_out/*pass.* -F fam_out/ -O map_1/ 
+False -f False -a fast -s 6 -th
+__________Fastq-files_________________________________
+down_out/SRR5947824_pass.fastq.gz
+down_out/SRR5947836_pass.fastq.gz
+down_out/SRR5947837_pass.fastq.gz
+down_out/SRR5947841_pass.fastq.gz
+down_out/SRR5947855_pass.fastq.gz
+down_out/SRR5947861_pass.fastq.gz
+down_out/SRR5947862_pass.fastq.gz
+down_out/SRR5947881_pass.fastq.gz
+The file names are not overlapping with the names in the metadata file. Please provide matching file names.

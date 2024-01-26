@@ -1,0 +1,37 @@
+(BiG-MAP_analyse) sf373@LAPTOP-7RMLPR2D:~/sf373/Project/BiG-MAP_working$ python3 BiG-MAP/src/BiG-MAP.analyse.py -B mete_map/biom-results/BiG-MAP.map.metacore.dec.biom -T metatranscriptomic -M DiseaseStatus -O meta_ana/ --explore
+__________Loading biom file_______________________
+Usage: biom convert [OPTIONS]
+Try 'biom convert -h' for help.
+
+Error: Invalid value for '-i' / '--input-fp': File 'mete_map/biom-results/BiG-MAP.map.metacore.dec.biom' does not exist.
+Traceback (most recent call last):
+  File "BiG-MAP/src/BiG-MAP.analyse.py", line 1230, in <module>
+    main()
+  File "BiG-MAP/src/BiG-MAP.analyse.py", line 1056, in main
+    json_file = export2biom(args.biom_file, args.outdir)
+  File "BiG-MAP/src/BiG-MAP.analyse.py", line 122, in export2biom
+    res_export = subprocess.check_output(cmd_export2biom, shell=True)
+  File "/home/sf373/miniconda3/envs/BiG-MAP_analyse/lib/python3.6/subprocess.py", line 336, in check_output
+    **kwargs).stdout
+  File "/home/sf373/miniconda3/envs/BiG-MAP_analyse/lib/python3.6/subprocess.py", line 418, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command 'biom convert -i mete_map/biom-results/BiG-MAP.map.metacore.dec.biom -o meta_ana/BiG-MAP.table.txt     --table-type='Pathway table' --to-json' returned non-zero exit status 2.
+
+
+(BiG-MAP_analyse) sf373@LAPTOP-7RMLPR2D:~/sf373/Project/BiG(BiG-MAP_analyse) sf373@LAPTOP-7RMLPR2D:~/sf373/Project/BiG-MAP_working$ python3 BiG-MAP/src/BiG-MAP.analyse.py -B mete_map/biom-results/BiG-MAP.mapcore.metacore.dec.biom -T met
+atranscriptomic -M DiseaseStatus -O meta_ana/ --explore
+__________Loading biom file_______________________
+Traceback (most recent call last):
+  File "BiG-MAP/src/BiG-MAP.analyse.py", line 1230, in <module>
+    main()
+  File "BiG-MAP/src/BiG-MAP.analyse.py", line 1067, in main
+    norm_df = norm_log2_data(gc_df)
+  File "BiG-MAP/src/BiG-MAP.analyse.py", line 284, in norm_log2_data
+    quantile_dict = (df_adj.quantile(axis=0)).to_dict() # calculate the quantile
+  File "/home/sf373/miniconda3/envs/BiG-MAP_analyse/lib/python3.6/site-packages/pandas/core/frame.py", line 8296, in quantile
+    qs=q, axis=1, interpolation=interpolation, transposed=is_transposed
+  File "/home/sf373/miniconda3/envs/BiG-MAP_analyse/lib/python3.6/site-packages/pandas/core/internals/managers.py", line 535, in quantile
+    values = _concat._concat_compat([b.values for b in blocks])
+  File "/home/sf373/miniconda3/envs/BiG-MAP_analyse/lib/python3.6/site-packages/pandas/core/dtypes/concat.py", line 174, in _concat_compat
+    return np.concatenate(to_concat, axis=axis)
+ValueError: need at least one array to concatenate

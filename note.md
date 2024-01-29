@@ -14,24 +14,10 @@ TODO:
 - Mit dem Wrapper rasufinden ob der Fehler wie oben beschrieben auch auftaucht
 - Wenn es ein Release recipe fertig schreiben -> WICHTIG
 - Mithilfe von [__foobar@0.0.1] den Wrapper testen -> läuft mit localen Dateien
-- Outputs erstellen
+- Outputs erstellen -> sind drinnen muss nurnoch morgen mit dem wrapper getestet werde!
 - Test erstellen
 - help text für jeden param aktualisieren
 - parameter überprüfen ob alle grenzen richtig sind und alle eingetragen sind was es an parameter gibt
-    - Man muss entwerder bei .analyse [BiG-MAP.map.meta.dec.biom] oder [BiG-MAP.mapcore.metacore.dec.biom] nehmen
-        - [.map.] = alles und [.mapcore.] = nur core!!!!!!
-        - sind in den order von output welcher map nutzt und dann noch /biom-results/ !!!!
-    - Man muss entwerder [--explore] oder [--compare] nehmen oder beide!!
-        - Für [--explore] muss auch [-t] angeben werden sowie [-fe] !!!!!
-        - Wenn man [--compare] nutzt muss man auch [-g] nutzen => WICHTIG!!!!
-        - auch hier muss man dann [-af] und [-ak] und [-fc]einstellen können!!!!!
-        - [-fc] man gibt erst an wie die KW file heißt dann wie die FIZ file heißt
-        - so einstellen das!!!!!!
-        - explore + t + fe
-        - compare + -af + ak + fc
-        - kontrollieren ob man bei den bools auch ein true braucht mit der option
-        - einstellen ob welches art von daten mann nimmt [metatranscriptomes] oder nicht !!!!!!!#
-        - [-I1], [-I2] und [-U] jewils die namen der Datein gewisse verändern und so auch im command block nutzem!!!!!!
 - Help section schreiben
 
 GETESTETE OPTIONS:
@@ -128,3 +114,4 @@ DONE:
 - Did create a new issue where i ask if its possible to make release for makeing the recipe -> NO ANSWER YET (24.01)
 - it seem the error only happen if the [.family.py] didn't run correct
 - Did run all modules with there options to check how they interact and which of them yeeling errors
+- Did rewrote the wrapper with since i know more about the options and how they work together or who has to be used. I also inlcude a output yet but didnt test it. Planemo also lint it without errors in the command, input and output section!

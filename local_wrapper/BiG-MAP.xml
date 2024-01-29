@@ -1,0 +1,279 @@
+<tool id="big-map" name="BiG-MAP" version="0.0+galaxy0" profile="21.05">
+       <description> A bioinformatic tool to profile abundance and expression levels of gene clusters </description>
+       <requirements>
+              <requirement type="package" version="0.0.1"> foobar </requirement>
+       </requirements>
+       <command detect_errors="exit_code">
+       <![CDATA[
+
+              mkdir output_download;
+
+              #if &download.used_methode == "download":       
+                     python3  $__tool_directory__/BiG-MAP/src/BiG-MAP.download.py
+                     --acclist ${acclist}
+                     --outdir output_download
+              ;
+              #else:
+                     #for $in in $input_map:
+                            ln -s $in output_download/$in.element_identifier;
+                     #end for
+              #end if
+
+              mkdir family_input;
+
+              #for $input in $indir:
+                     ln -s $input family_input/$input.element_identifier;
+              #end for
+
+              mkdir family_output;
+
+              python3 $__tool_directory__/BiG-MAP/src/BiG-MAP.family.py 
+              --indir family_input
+              --outdir family_output
+              --threshold_GC ${threshold_GC}
+              --threshold_HG ${threshold_HG}
+              --flank_genes ${flank_genes}
+              ${genomefiles}
+              --sketch ${sketch}
+              --kmer ${kmer}
+              ${metatranscriptomes}
+              #if $bigscape.use_bigscape == "yes":
+                     --cut-off ${cut_off}
+                     --bigscape_path  $__tool_directory__/../BiG-SCAPE_working/BiG-SCAPE/bigscape.py
+                     --pfam  $__tool_directory__/BiG-MAP/pfam
+                     --threads \${GALAXY_SLOTS:-6}
+              #end if
+              ;
+
+              mkdir map_output;
+
+              python3 $__tool_directory__/BiG-MAP/src/BiG-MAP.map.py
+              #if $sample.value == "paired":
+                     -I1 output_download/*pass_1*
+                     -I2 output_download/*pass_2*
+              #else:
+                     -U output_download/*pass.*
+              #end if
+              #if $input_type.value == "dir":
+                     -F family_output
+              #else:
+                     -P family_output/*.pickle
+              #end if
+              --outdir map_output
+              --biom_output ${biom_output}
+              ${fasta}
+              --bowtie2_setting ${bowtie2_setting}.value
+              ${average}
+              --threads \${GALAXY_SLOTS:-8}
+              ;
+
+              mkdir analyse_output;
+
+              python3 $__tool_directory__/BiG-MAP/src/BiG-MAP.analyse.py
+              #if $biom_type.value == "all":
+                     --biom_file map_output/biom_results/*.map.*
+              #else:
+                     --biom_file map_output/biom_results/*.mapcore.*
+              #end if
+              #if $sample_type.value == "metag":
+                     --sample_type metagenomic
+              #else:
+                     --sample_type metatranscriptic
+              #end if
+              #if $modes.is_select == "explore":
+                     --explore
+                     --threshold ${threshold}
+                     --file_name_explore ${file_name_explore}
+              #else if $modes.is_select == "compare":
+                     --compare
+                     --groups ${groups}
+                     --file_names_compare ${file_names_compare}
+                     --alpha_fitzig ${alpha_fitzig}
+                     --alpha_kruskal ${alpha_kruskal}
+              #else:
+                     --explore
+                     --compare
+                     --threshold ${threshold}
+                     --file_name_explore ${file_name_explore}
+                     --groups ${groups}
+                     --file_names_compare ${file_names_compare}
+                     --alpha_fitzig ${alpha_fitzig}
+                     --alpha_kruskal ${alpha_kruskal}
+              #end if
+              --metagroup ${metagroup}
+              --cutoff_samples ${cutoff_samples}
+              --outdir analyse_output
+              ;
+
+              zip -r analyse_output.zip analyse_output;
+       ]]>
+       </command>
+       <inputs>
+              <conditional name="download" >
+                     <param type="select" name="used_methode" label="Select Input methode"
+                            help="Select the wanted methode if you want to download the data or provide your own data" >
+                                   <option value="no_download"> Use own FASTQ/FASTA files </option>
+                                   <option value="download"> Use the build in download function </option>
+                     </param>
+                     <when value="download">
+                            <param argument="--acclist" type="data" format=".txt"
+                                   label="Input *.txt file"
+                                   help="You can either download an  accession list via https://www.ncbi.nlm.nih.gov/Traces/study/
+                                   or you can create your own accession list. How the list should look like please have a look at
+                                   the end of the tool in the help section, there you can see an example of such a file!" />
+                     </when>
+                     <when value="no_download" >
+                            <param name="input_map" type="data" multiple="true" format=".fastq .fq -fq.gz .fna .fa .fasta .fastq.gz"
+                                   label="Input files in either FASTQ or FASTA for later"
+                                   help="Use your own FASTQ or FASTA files instead of download them from the included function. NOTE: ONLY 1 FROMAT AS INPUT! IMPORTANT: Depending on the input if you use later 'paired' sample the first mate should contain pass_1 anywehre in the file name while the second mate should contain pass_2 anywhere. When using 'unpaired' sample please look that pass is before the file format (e.g. *pass.fastq)!" />
+                     </when>
+              </conditional> 
+              <param argument="--indir" type="data" multiple="true" format=".gbk"
+                     label="Input your genbank file here"
+                     help="Input you genbank files here for making GCFs." />
+              <param argument="--threshold_GC" type="float" value="0.8" min="0.0" max="1.0" optional="true"
+                     label="Threshold for consider protein sequence to be similar"
+                     help="Here you can decide at which threshold the protein sequence should be considere to be similiar. Default = 0.8" />
+              <param argument="--threshold_HG" type="float" value="0.1" min="0.0" max="1.0" optional="true"
+                     label="Threshold for consider protein sequence (housekeeping) to be similar"
+                     help="Here you can decide at which threshold the protein sequence of the housekeeping gene should be considere to be similiar. Default = 0.1" /> 
+              <conditional name="bigscape" >
+                     <param type="select" name="use_bigscape" label="Do you want to use BiG-SCAPE" 
+                            help="Select if you want to use BiG-SCAPE or not as extra run">
+                                   <option value="no"> no </option>
+                                   <option value="yes"> yes </option>
+                     </param>
+                     <when value="yes"> 
+                            <param argument="--cut-off" type="float" value="0.2" min="0.0" max="1.0" optional="true"
+                                   label="cutoff value for BiG-SCAPE"
+                                   help="Here you can change the value for the cutoff value where BiG-SCAPE consider protein sequences of the gene clusters to be similiar. Default = 0.2" />
+                     </when>
+                     <when value="no">
+                     </when>
+              </conditional>
+              <param argument="--flank_genes" type="integer" value="0" min="0" optional="True"
+                     label="Number of genes flanking the core gene"
+                     help="Specify the number of genes flanking the core gene of a gene cluster. Default = 0" />
+              <param argument="--genomefiles" type="boolean" truevalue="--genomefiles True" falsevalue="" checked="False"
+                     label="Whole genome fasta file as output?"
+                     help="When toggle this tool will output you a bigger fasta files. WARNING: This might use more disc space!" />
+              <param argument="--sketch" type="integer" value="5000" optional="True"
+                     label="sketch size (by Mash)"
+                     help="Specify the the sketch size which is created by Mash. NOTE: Please read the Mash instructions when changing this value. Default = 5000" />
+              <param argument="--kmer" type="integer" value="16" optional="True"
+                     label="k-mer size (by Mash)"
+                     help="Specify the the k-mer size which is created by Mash. NOTE: Please read the Mash instructions when changing this value. Default = 16" />
+              <param argument="--metatranscriptomes" type="boolean" truevalue="--metatranscriptomes" falsevalue="" checked="False"
+                     label="Reads from house-keeping gene"
+                     help="When you use house-keeping gene in the analysis toggle this option to true." />
+              <param name="smaple" type="select" label="Which type of analyse should be used?"
+                     help="Please select if you want to analys the sample pairwise or unpaired. Also notice when you upload you sample that they should contain certain strings in there filename!" >
+                            <option value="paird"> Paired </option>
+                            <option value="unpaired"> Unpaired </option>
+              </param>
+              <param name="input_type" type="select" label="Select the directory or a pickle file should be used as input"
+                     help="You can either use a directory which will be created automatically by the program or the pickle file which also be created by the program" >
+                            	<option value="dir"> Directory </option>
+                                   <option value="pickle"> Pickle </option>
+              </param>
+              <param argument="--biom_output" type="data" format =".txt" label="Metadata file"
+                     help="Please provide the a Metadata text file here. Look at the help section for a example how they should look like!" />
+              <param argument="--fasta" type="boolean" truevalue="--fasta True" falsevalue="" checked="False"
+                     label="Using fasta-format input"
+                     help="Toggle if you want to use fasta file format instead fo the fastq file format" />
+              <param argument="--bowtie2_setting" type="select"
+                     label="Select Bowtie2 setting"
+                     help="Here you can choose how bowtie2 should work in the alligment.">
+                            <option value="fast"> fast </option>
+                            <option value="very-fast"> very-fast </option>
+                            <option value="sensitive"> sensitive </option>
+                            <option value="very-sensitive"> very-sensitive </option>
+                            <option value="very-fast-local"> very-fast-local </option>
+                            <option value="fast-local"> fast-local </option>
+                            <option value="sensitive-local"> sensitive-local </option>
+                            <option value="very-sensitive-local"> very-sensitive-local </option>
+              </param>
+              <param argument="--average" type="boolean" truevalue="--average True" falsevalue="" checked="False"
+                     label="Average values as output"
+                     help="Toggle if you want to habe output read as average value instead of summed counts. This option is recommended to use!" />
+              <param name="biom_type" type="select" label="Select which .biom file should be used"
+                     help="The program will automatically create 2 different .biom file pleae select which one you want. BiG-MAP.map.meta.dec.biom use the total genom while BiG-MAP.mapcore.metacore.dec.biom use the core only!" >
+                            <option value="all"> BiG-MAP.map.meta.dec.biom </option>
+                            <option value="core"> BiG-MAP.mapcore.metacore.dec.biom </option>
+              </param>
+              <param name="sample_type" type="select" label="Which type of sample where used?"
+                     help="Plese select which kind of type sample are used." >
+                            <option value="metag"> Metagenomic </option>
+                            <option value="matat"> Metatranscriptic </option>
+              </param>
+              <conditional name="modes">
+                     <param name="is_select" type="select" label="select if you want only the best gene cluster as output (explore) or statistic test as output (compare)"
+                            help="Choose if you want to have the best x best gene cluster as output with explore or if the output should contain certain test with compare. Using both are also possible!">
+                                   <option value="explore"> Explore </option>
+                                   <option value="compare"> Compare </option>
+                                   <option value="both"> Both </option>
+                     </param>
+                     <when value="explore">
+                            <param argument="--threshold" type="integer" value="20" optional="true"
+                                   label="Heatmap limit"
+                                   help="Here you can choose how many of the best gene cluster should be used in the heatmap." />
+                            <param argument="--file_name_explore" type="text" optional="false" value="explore_heatmap" label="File name of the heatmap"
+                                   help="Change name of the heatmap if you want" >
+                                          <validator type="empty_field" />
+                            </param>
+                     </when>
+                     <when value="compare">
+                            <param argument="--groups" type="text" value="" optional="false" label="Groups which should be compared"
+                                   help="Please provide 2 groups which should be compare. Here are 2 examples: UC Control or UC CD. IMPORTAND: Plese sepeared them with a space!">
+                                   <validator type="empty_field" />
+                            </param>
+                            <param argument="--file_names_compare" type="text" optional="false" value="map1_kruskall map2_fitZIG" label="Name of the files"
+                                   help="It is posible to change the name of the files here. Please seperate them with a space! The first string will rename the kruskall file the second string will rename the ZIG file." >
+                                          <validator type="empty_field" />
+                            </param>
+                            <param argument="--alpha_fitzig" type="float" optional="true" value="0.05" label="Alpha value for ZIG model signification"
+                                   help="Alpha value to determine significance of the fitZIG model. Default=0.05." />
+                            <param argument="--alpha_kruskal" type="float" optional="true" value="0.05" label="Alpha value for Kruskal Wallis model signification"
+                                   help="Alpha value to determine significance of the Kruskal Wallis model. Default=0.05." />
+                     </when>
+                     <when value="both" >
+                            <param argument="--threshold" type="integer" value="20" optional="true"
+                                   label="Heatmap limit"
+                                   help="Here you can choose how many of the best gene cluster should be used in the heatmap." />
+                            <param argument="--file_name_explore" type="text" optional="false" value="explore_heatmap" label="File name of the heatmap"
+                                   help="Change name of the heatmap if you want" >
+                                          <validator type="empty_field" />
+                            </param>
+                            <param argument="--groups" type="text" value="" optional="false" label="Groups which should be compared"
+                                   help="Please provide 2 groups which should be compare. Here are 2 examples: UC Control or UC CD. IMPORTAND: Plese sepeared them with a space!">
+                                   <validator type="empty_field" />
+                            </param>
+                            <param argument="--file_names_compare" type="text" optional="false" value="map1_kruskall map2_fitZIG" label="Name of the files"
+                                   help="It is posible to change the name of the files here. Please seperate them with a space! The first string will rename the kruskall file the second string will rename the ZIG file." >
+                                          <validator type="empty_field" />
+                            </param>
+                            <param argument="--alpha_fitzig" type="float" optional="true" value="0.05" label="Alpha value for ZIG model signification"
+                                   help="Alpha value to determine significance of the fitZIG model. Default=0.05." />
+                            <param argument="--alpha_kruskal" type="float" optional="true" value="0.05" label="Alpha value for Kruskal Wallis model signification"
+                                   help="Alpha value to determine significance of the Kruskal Wallis model. Default=0.05." />
+                     </when>
+              </conditional>
+              <param argument="--metagroup" type="text" optional="false" value="" label="Provide the Metagroup here"
+                     help="For example: DiseaseStatus or Longitude" >
+                            <validator type="empty_field"/>
+              </param>
+              <param argument="--cutoff_samples" type="float" optional="true" value="0.25" label="Cutoff value"
+                     help="Value to filter BGCs with low amount of hits. Default=0.25." />
+       </inputs>
+       <outputs>
+              <data name="output" label="graphical_and_tsv_output : ${tool.name}" from_work_dir="analyse_output.zip" format="zip" />
+       </outputs>
+       <help>
+       <![CDATA[
+              # TODO: Wrote this section befor upload the tool!
+       ]]>
+       </help>
+       <citations> 
+              <citation type="doi">10.1128/msystems.00937-21</citation>
+       </citations>
+</tool>

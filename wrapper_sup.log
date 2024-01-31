@@ -1,0 +1,9 @@
+Building a SMALL index
+Traceback (most recent call last):
+  File "/home/sf373/sf373/Project/BiG-MAP_working/BiG-MAP/src/BiG-MAP.map.py", line 162, in bowtie2_map
+    res_map = subprocess.check_output(cmd_bowtie2_map, shell=True, stderr=subprocess.STDOUT)
+  File "/home/sf373/miniconda3/envs/__foobas@0.0.1/lib/python3.6/subprocess.py", line 336, in check_output
+    **kwargs).stdout
+  File "/home/sf373/miniconda3/envs/__foobas@0.0.1/lib/python3.6/subprocess.py", line 418, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command 'bowtie2 --fast.value --no-unal --threads 1 -x map_output/BiG-MAP.GCF_HGF -1 output_download/SRR5947824_pass_1.fastq.gz -2 output_download/SRR5947824_pass_2.fastq.gz -S map_output/SRR5947824.sam' returned non-zero exit status 1.
